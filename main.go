@@ -107,17 +107,21 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%s %s %v %.2f ms\n", r.Method, r.URL.RequestURI(), 200, elapsed)
 }
 func main() {
-	http.HandleFunc("/", handler)
-	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.Handle("/metrics", promhttp.Handler())
-	http.HandleFunc("/json", jsonHandler)
-	http.HandleFunc("/template", templateHandler)
-	http.HandleFunc("/ping", pingHandler)
-	http.HandleFunc("/version", versionHandler)
-	http.HandleFunc("/fibo", fiboHandler)
-	http.HandleFunc("/fibo/", fiboHandler)
 
-	log.Fatal(http.ListenAndServe(":80", nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handler)
+	mux.Handle("/favicon.ico", http.NotFoundHandler())
+	mux.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/json", jsonHandler)
+	mux.HandleFunc("/template", templateHandler)
+	mux.HandleFunc("/ping", pingHandler)
+	mux.HandleFunc("/version", versionHandler)
+	mux.HandleFunc("/fibo", fiboHandler)
+	mux.HandleFunc("/fibo/", fiboHandler)
+
+	if err := http.ListenAndServe(":80", mux); err != nil {
+		log.Fatal(err)
+	}
 
 }
 
