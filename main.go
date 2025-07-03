@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -20,7 +19,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	fmt.Fprintln(w, "Hello, 世界, สวัสดี")
-	fmt.Fprintln(w, "Version 2.4")
+	fmt.Fprintln(w, "Version 2.5")
 
 	hostName, _ := os.Hostname()
 	fmt.Fprintf(w, "Server Name: %s\n", hostName)
@@ -55,9 +54,9 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	user := User{
 		Id:    1,
-		Name:  "Somsri Phrapradaeng",
-		Email: "somsri.phrapradaeng@fakemail.com",
-		Phone: "0812374651",
+		Name:  "Sam Phrapradaeng",
+		Email: "sam.phrapradaeng@fakemail.com",
+		Phone: "+66-81-234-5678",
 	}
 	json.NewEncoder(w).Encode(user)
 	elapsed := float64(time.Since(startTime).Microseconds()) / 1000.0
@@ -75,9 +74,9 @@ func templateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user := User{
 		Id:    1,
-		Name:  "Somsri Phrapradaeng",
-		Email: "somsri.phrapradaeng@fakemail.com",
-		Phone: "0812374651",
+		Name:  "Sam Phrapradaeng",
+		Email: "sam.phrapradaeng@fakemail.com",
+		Phone: "+66-81-234-5678",
 	}
 	temp.Execute(w, user)
 
@@ -101,7 +100,7 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
-	fmt.Fprintln(w, "2.4")
+	fmt.Fprintln(w, "2.5")
 	elapsed := float64(time.Since(startTime).Microseconds()) / 1000.0
 
 	fmt.Printf("%s %s %v %.2f ms\n", r.Method, r.URL.RequestURI(), 200, elapsed)
@@ -109,15 +108,15 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler)
-	mux.Handle("/favicon.ico", http.NotFoundHandler())
-	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/json", jsonHandler)
-	mux.HandleFunc("/template", templateHandler)
-	mux.HandleFunc("/ping", pingHandler)
-	mux.HandleFunc("/version", versionHandler)
-	mux.HandleFunc("/fibo", fiboHandler)
-	mux.HandleFunc("/fibo/", fiboHandler)
+	mux.HandleFunc("GET /", handler)
+	mux.Handle("GET /favicon.ico", http.NotFoundHandler())
+	mux.Handle("GET /metrics", promhttp.Handler())
+	mux.HandleFunc("GET /json", jsonHandler)
+	mux.HandleFunc("GET /template", templateHandler)
+	mux.HandleFunc("GET /ping", pingHandler)
+	mux.HandleFunc("GET /version", versionHandler)
+	mux.HandleFunc("GET /fibo", fiboHandler)
+	mux.HandleFunc("GET /fibo/{id}", fiboHandler)
 
 	if err := http.ListenAndServe(":80", mux); err != nil {
 		log.Fatal(err)
@@ -129,9 +128,12 @@ func fiboHandler(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now() // start time
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	nStr := strings.TrimPrefix(r.URL.Path, "/fibo/")
-	n, err := strconv.Atoi(nStr)
-	if err != nil {
+	// nStr := strings.TrimPrefix(r.URL.Path, "/fibo/")
+	// n, err := strconv.Atoi(nStr)
+
+	id := r.PathValue("id")
+
+	if n, err := strconv.Atoi(id); err != nil {
 		fmt.Fprintf(w, "Please provide a valid number. Fibonacci calculation request is rejected!\n")
 	} else {
 		if n <= 45 && n >= 0 {
@@ -147,11 +149,12 @@ func fiboHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fibo(n int) int {
-	if n == 0 {
+	switch n {
+	case 0:
 		return 0
-	} else if n == 1 {
+	case 1:
 		return 1
-	} else {
+	default:
 		return fibo(n-1) + fibo(n-2)
 	}
 }
