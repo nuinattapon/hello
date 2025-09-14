@@ -3,13 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"hello/config"
 	"html/template"
 	"net"
 	"net/http"
 	"os"
 	"time"
-
-	"hello/config"
 )
 
 // User represents a user entity

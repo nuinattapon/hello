@@ -7,7 +7,7 @@ import (
 
 const (
 	// Version of the application
-	Version = "2.6"
+	Version = "2.7"
 
 	// DefaultPort is the default port the server will listen on
 	DefaultPort = "80"
